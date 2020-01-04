@@ -16,7 +16,11 @@ class Dashboard extends CI_Controller {
 			'title' => 'Hello',
 			'content_view' => 'dashboard_view'
 		);
-		$this->load->view('template_view', $data);
+		if ($this->session->userdata('role') == 'ADMIN') {
+			$this->load->view('template_view', $data);
+		} else {
+			redirect('tasks');
+		}
 	}
 
 	public function logout(){

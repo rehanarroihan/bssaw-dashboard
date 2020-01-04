@@ -26,7 +26,11 @@ class Login extends CI_Controller {
 					if(!empty($src)){
 						redirect($src);
 					}else{
-                        redirect('dashboard');
+						if($this->session->userdata('role') == 'ADMIN') {
+							redirect('dashboard');
+						} else {
+							redirect('tasks');
+						}
                     }
 				}else{
 					$this->session->set_flashdata('announce', 'Invalid username or password');
