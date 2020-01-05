@@ -22,7 +22,7 @@ class Tasks_model extends CI_Model {
     public function get($id_user){
         if ($id_user != null) {
             $query = $this->db
-                    ->select('id, type, start_time', 'end_time')
+                    ->select('id, type, start_time, end_time')
                     ->where('id_user', $id_user)
                     ->get('tasks')
                     ->result();

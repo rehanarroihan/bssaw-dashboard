@@ -60,7 +60,7 @@
               <div class="input-group-prepend">
                 <span class="input-group-text"><i class="far fa-clock"></i></span>
               </div>
-              <date-picker v-model="newTaskData.start_time" @dp-change="onStartDateChange" :config="datePickerOption"></date-picker>
+              <date-picker v-model="startTimeInput" @dp-change="onStartDateChange" :config="startDatePickerOption"></date-picker>
             </div>
           </div>
           <div class="form-group">
@@ -69,7 +69,7 @@
               <div class="input-group-prepend">
                 <span class="input-group-text"><i class="far fa-clock"></i></span>
               </div>
-              <date-picker v-model="newTaskData.end_time" @dp-change="onEndDateChange" :config="datePickerOption"></date-picker>
+              <date-picker v-model="endTimeInput" @dp-change="onEndDateChange" :config="endDatePickerOption"></date-picker>
             </div>
           </div>
         </div>
@@ -164,11 +164,17 @@ var app = new Vue({
       type: '',
       full_name: '<?php echo $this->session->userdata('full_name') ?>',
       id_user: '<?php echo $this->session->userdata('user_id') ?>',
-      start_time: new Date(),
+      start_time: '',
       end_time: '',
     },
+    startTimeInput: '',
+    endTimeInput: '',
     isAddTaskLoading: false,
-    datePickerOption: {
+    startDatePickerOption: {
+      format: 'dddd, DD MMMM YYYY - HH:mm',
+      locale: 'id'
+    },
+    endDatePickerOption: {
       format: 'dddd, DD MMMM YYYY - HH:mm',
       useCurrent: false,
       locale: 'id'
@@ -176,11 +182,13 @@ var app = new Vue({
 	},
 	methods: {
     onStartDateChange(e) {
-      this.start_time = moment(e.date._i, 'dddd, DD MMMM YYYY - HH:mm').format('YYYY-MM-DD hh:mm:ss');
+      this.newTaskData.start_time = moment(this.startTimeInput, 'dddd, DD MMMM YYYY - HH:mm:ss').format('YYYY-MM-DD HH:mm');
+      this.endDatePickerOption.minDate = e.date;
     },
 
     onEndDateChange(e) {
-      this.start_time = moment(e.date._i, 'dddd, DD MMMM YYYY - HH:mm').format('YYYY-MM-DD hh:mm:ss');
+      this.newTaskData.end_time = moment(this.endTimeInput, 'dddd, DD MMMM YYYY - HH:mm:ss').format('YYYY-MM-DD HH:mm');
+      this.startDatePickerOption.maxDate = e.date;
     },
 
     toggleAddNewTask() {
@@ -205,7 +213,7 @@ var app = new Vue({
             id_task: res.data[i].id,
             type: res.data[i].type,
             start_time: res.data[i].start_time,
-            start_time: res.data[i].start_time,
+            end_time: res.data[i].end_time,
           };
           self.taskList.push(newFormat);
         }
@@ -235,9 +243,11 @@ var app = new Vue({
           type: '',
           full_name: '<?php echo $this->session->userdata('full_name') ?>',
           id_user: '<?php echo $this->session->userdata('user_id') ?>',
-          start_time: new Date(),
+          start_time: '',
           end_time: '',
-        },
+        };
+        self.startTimeInput = '';
+        self.endTimeInput = '';
         self.isAddTaskLoading = false;
         self.getMyTaskList();
       });
