@@ -24,8 +24,7 @@
         <!-- small card -->
         <div class="small-box bg-info">
           <div class="inner">
-            <h3>9999</h3>
-
+            <h3><?php echo $dashboard_data['employees'] ?></h3>
             <p>Pegawai</p>
           </div>
           <div class="icon">
@@ -41,8 +40,7 @@
         <!-- small card -->
         <div class="small-box bg-success">
           <div class="inner">
-            <h3>9999</h3>
-
+            <h3><?php echo $dashboard_data['running_tasks'] ?></h3>
             <p>Pekerjaan Berjalan Saat Ini</p>
           </div>
           <div class="icon">
@@ -69,7 +67,7 @@
   </div>
 </div>
 <!-- /.content-header -->
-<section class="content">
+<section class="content" v-cloak>
   <div class="container-fluid">
     <div class="card">
       <div class="card-header">
@@ -94,7 +92,7 @@
 
               <div class="info-box-content">
                 <span class="info-box-text">Maintenance</span>
-                <span class="info-box-number">9999</span>
+                <span class="info-box-number">{{ reportData.summary.maintenance }}</span>
               </div>
               <!-- /.info-box-content -->
             </div>
@@ -107,7 +105,7 @@
 
               <div class="info-box-content">
                 <span class="info-box-text">Installation</span>
-                <span class="info-box-number">9999</span>
+                <span class="info-box-number">{{ reportData.summary.installation }}</span>
               </div>
               <!-- /.info-box-content -->
             </div>
@@ -120,7 +118,7 @@
 
               <div class="info-box-content">
                 <span class="info-box-text">Preventive</span>
-                <span class="info-box-number">9999</span>
+                <span class="info-box-number">{{ reportData.summary.preventive }}</span>
               </div>
               <!-- /.info-box-content -->
             </div>
@@ -133,7 +131,7 @@
 
               <div class="info-box-content">
                 <span class="info-box-text">Visit</span>
-                <span class="info-box-number">9999</span>
+                <span class="info-box-number">{{ reportData.summary.visit }}</span>
               </div>
               <!-- /.info-box-content -->
             </div>
@@ -145,7 +143,7 @@
 
               <div class="info-box-content">
                 <span class="info-box-text">BTS</span>
-                <span class="info-box-number">9999</span>
+                <span class="info-box-number">{{ reportData.summary.bts }}</span>
               </div>
               <!-- /.info-box-content -->
             </div>
@@ -165,26 +163,12 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>1</td>
-              <td>Ahmad Shobirin</td>
-              <td>Maintenance</td>
-              <td>Kamis, 20 Januari 2020 14.00</td>
-              <td>Kamis, 20 Januari 2020 19.00</td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>Ahmad Munirus</td>
-              <td>BTS</td>
-              <td>Kamis, 20 Januari 2020 12.00</td>
-              <td>Kamis, 20 Januari 2020 16.00</td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td>Hidayat Kurnio</td>
-              <td>Visit</td>
-              <td>Kamis, 20 Januari 2020 08.00</td>
-              <td>Kamis, 20 Januari 2020 10.00</td>
+            <tr v-for="(item, index) in reportData.data" :key="index">
+              <td>{{ item.no }}</td>
+              <td>{{ item.full_name }}</td>
+              <td>{{ convertTitleCase(item.type) }}</td>
+              <td>{{ convertDateFormat(item.start_time) }}</td>
+              <td>{{ convertDateFormat(item.end_time) }}</td>
             </tr>
           </tbody>
         </table>
@@ -195,7 +179,7 @@
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function(){ 
-  $('#reportTable').DataTable();
+  //$('#reportTable').DataTable();
   $('#report-range').daterangepicker({
     timePicker: true,
     timePickerIncrement: 30,
@@ -212,12 +196,54 @@ var app = new Vue({
 	el: '#app',
 	data: {
     baseURL: '<?php echo base_url() ?>',
+    reportData: {
+      summary: {},
+      data: []
+    },
 	},
 	methods: {
+    getReportData(timeStart, timeEnd) {
+      const self = this;
+      self.employeeList = [];
+      axios.post(self.baseURL + 'dashboard/getReport/', {
+        timeStart, timeEnd
+      }).then((res) => {
+        self.reportData.summary = res.data.summary;
+        if (res.data.data.length === 0) { return; }
+        // convert into better format
+        for (let i = 0; res.data.data.length; i++) {
+          const number = i + 1;
+          let newFormat = {
+            no: number,
+            id_task: res.data.data[i].id_task,
+            type: res.data.data[i].type,
+            start_time: res.data.data[i].start_time,
+            start_time: res.data.data[i].start_time,
+            id_user: res.data.data[i].id_user,
+            full_name: res.data.data[i].full_name,
+          };
+          self.reportData.data.push(newFormat);
+        }
+      });
+    },
 
+    convertDateFormat(oldFormat) {
+      return moment(oldFormat).lang('id').format('dddd, DD MMMM YYYY - HH:mm');
+    },
+
+    convertTitleCase(string) {
+      str = string.toLowerCase().split(' ');
+      for (var i = 0; i < str.length; i++) {
+        str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1); 
+      }
+      return str.join(' ');
+    },
   },
-	mounted: function() {
-    
+	mounted() {
+    this.getReportData(
+      "<?php echo $dashboard_data['first_task_date'] ?>",
+      "<?php echo $dashboard_data['last_task_date'] ?>"
+    );
 	}
 });
 </script>

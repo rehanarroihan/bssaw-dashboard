@@ -15,7 +15,8 @@ class Dashboard extends CI_Controller {
 	public function index(){
 		$data = array(
 			'title' => 'Hello',
-			'content_view' => 'dashboard_view'
+			'content_view' => 'dashboard_view',
+			'dashboard_data' => $this->Dashboard_model->getDashboardData()
 		);
 		if ($this->session->userdata('role') == 'ADMIN') {
 			$this->load->view('template_view', $data);
@@ -29,7 +30,14 @@ class Dashboard extends CI_Controller {
 		redirect('login');
 	}
 
-	public function summary() {
-		echo json_encode($this->Dashboard_model->getSummary());
+	// API Endpoint
+	public function getReport() {
+		$json = file_get_contents('php://input');
+		$data = json_decode($json);
+		echo json_encode($this->Dashboard_model->getReport($data->timeStart, $data->timeEnd));
+	}
+
+	public function date() {
+		echo json_encode($this->Dashboard_model->getDashboardData());
 	}
 }
