@@ -52,8 +52,8 @@ class Dashboard_model extends CI_Model {
 		$result = [
 			"employees" => $this->db->where('role', 'EMPLOYEE')->get('users')->num_rows(),
 			"running_tasks" => $runningTaskQuery,
-			"first_task_date" => $firstTaskDate[0]->start_time,
-			"last_task_date" => $lastTaskDate[0]->end_time
+			"first_task_date" => count($firstTaskDate) > 0 ? $firstTaskDate[0]->start_time : '',
+			"last_task_date" => count($lastTaskDate) ? $lastTaskDate[0]->end_time : ''
 		];
 		return $result;
 	}

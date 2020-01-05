@@ -26,7 +26,7 @@ class Tasks extends CI_Controller {
 			$data->type,
 			$data->start_time,
 			$data->end_time,
-			$data->id_user,
+			$data->id_user
 		);
 
 		$output = array(
