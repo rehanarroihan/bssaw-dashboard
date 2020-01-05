@@ -74,13 +74,18 @@
         <h3 class="card-title">Report Pekerjaan Petugas</h3>
       </div>
       <div class="card-body">
+        <div class="loading" v-if="reportSearchLoading" style="height: 100%; width: 100%; z-index: 999; background-color: #73737373; position: absolute; top: 0; left: 0"></div>
         <div class="form-group">
           <label>Filter Range Waktu</label>
           <div class="input-group">
             <div class="input-group-prepend">
               <span class="input-group-text"><i class="far fa-clock"></i></span>
             </div>
-            <input type="text" class="form-control float-right" id="report-range">
+            <input type="text" v-model="hwow" class="form-control float-right" id="report-range">
+            <button type="button" @click="getReportData" class="btn btn-primary ml-2">
+              <i class="fa fa-search"></i>
+              &nbsp;Cari
+            </button>
           </div>
         </div>
         <!-- result info -->
@@ -178,6 +183,8 @@
 </section>
 </div>
 <script>
+var startTimeRange = "<?php echo $dashboard_data['first_task_date'] ?>";
+var endTimeRange = "<?php echo $dashboard_data['last_task_date'] ?>";
 document.addEventListener('DOMContentLoaded', function(){ 
   //$('#reportTable').DataTable();
   $('#report-range').daterangepicker({
@@ -189,6 +196,8 @@ document.addEventListener('DOMContentLoaded', function(){
   });
   $('#report-range').on('apply.daterangepicker', function(ev, picker) {
     // callback on apply date range
+    startTimeRange = picker.startDate.format('YYYY-MM-DD HH:mm:ss');
+    endTimeRange = picker.endDate.format('YYYY-MM-DD HH:mm:ss');
   });
 }, false);
 
@@ -196,18 +205,26 @@ var app = new Vue({
 	el: '#app',
 	data: {
     baseURL: '<?php echo base_url() ?>',
+    reportSearchLoading: false,
+    hwow: '',
     reportData: {
       summary: {},
       data: []
     },
 	},
 	methods: {
-    getReportData(timeStart, timeEnd) {
+    getReportData() {
+      this.reportSearchLoading = true;
+      this.reportData = {
+        summary: {},
+        data: []
+      };
       const self = this;
       self.employeeList = [];
-      axios.post(self.baseURL + 'dashboard/getReport/', {
-        timeStart, timeEnd
+      axios.post(self.baseURL + 'dashboard/getReport', {
+        timeStart: startTimeRange, timeEnd: endTimeRange
       }).then((res) => {
+        self.reportSearchLoading = false;
         self.reportData.summary = res.data.summary;
         if (res.data.data.length === 0) { return; }
         // convert into better format
@@ -240,10 +257,7 @@ var app = new Vue({
     },
   },
 	mounted() {
-    this.getReportData(
-      "<?php echo $dashboard_data['first_task_date'] ?>",
-      "<?php echo $dashboard_data['last_task_date'] ?>"
-    );
+    this.getReportData();
 	}
 });
 </script>

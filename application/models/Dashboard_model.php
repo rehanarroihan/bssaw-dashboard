@@ -12,25 +12,28 @@ class Dashboard_model extends CI_Model {
 							->order_by('start_time', 'desc')
 							->get('tasks')->result();
 		$result = [
-			"summary" => $this->getSummary(),
+			"summary" => $this->getSummary($timeStart, $timeEnd),
 			"data" => $taskListQuery
 		];
 		return $result;
 	}
     
-    private function getSummary(){
+    private function getSummary($timeStart, $timeEnd){
 		$result = [
-			"maintenance" => $this->taskTypeCount('MAINTENANCE'),
-			"installation" => $this->taskTypeCount('INSTALLATION'),
-			"preventive" => $this->taskTypeCount('PREVENTIVE'),
-			"visit" => $this->taskTypeCount('VISIT'),
-			"bts" => $this->taskTypeCount('BTS'),
+			"maintenance" => $this->taskTypeCount('MAINTENANCE', $timeStart, $timeEnd),
+			"installation" => $this->taskTypeCount('INSTALLATION', $timeStart, $timeEnd),
+			"preventive" => $this->taskTypeCount('PREVENTIVE', $timeStart, $timeEnd),
+			"visit" => $this->taskTypeCount('VISIT', $timeStart, $timeEnd),
+			"bts" => $this->taskTypeCount('BTS', $timeStart, $timeEnd),
 		];
         return $result;
 	}
 	
-	private function taskTypeCount($type) {
-		return $this->db->where('type', $type)->get('tasks')->num_rows();
+	private function taskTypeCount($type, $timeStart, $timeEnd) {
+		return $this->db->where('type', $type)
+						->where("start_time >=", $timeStart)
+						->where("end_time <=", $timeEnd)
+						->get('tasks')->num_rows();
 	}
 
 	public function getDashboardData() {
