@@ -107,8 +107,8 @@
                   <td>{{ convertDateFormat(item.start_time) }}</td>
                   <td>{{ convertDateFormat(item.end_time) }}</td>
                   <td>
-                    <button @click="editEmployee(item)" class="btn btn-xs btn-success"><i class="fa fa-edit"></i> Edit</button>
-                    <button @click="deleteEmployee(item.id_user)" class="btn btn-xs btn-danger"><i class="fa fa-trash"></i> Delete</button>
+                    <button @click="editTask(item)" class="btn btn-xs btn-success"><i class="fa fa-edit"></i> Edit</button>
+                    <button @click="deleteTask(item.id_task)" class="btn btn-xs btn-danger"><i class="fa fa-trash"></i> Delete</button>
                   </td>
                 </tr>
               </tbody>
@@ -197,6 +197,7 @@ var app = new Vue({
       axios.post(self.baseURL + 'tasks/get/' + '<?php echo $this->session->userdata('user_id') ?>').then((res) => {
         if (res.data.length === 0) { return; }
         // converting to bettter format
+        let willBePush = [];
         for (let i = 0; res.data.length; i++) {
           const number = i + 1;
           let newFormat = {
@@ -241,6 +242,16 @@ var app = new Vue({
         self.getMyTaskList();
       });
     },
+
+    deleteTask(id_task) {
+      const self = this;
+      let r = confirm('Are you sure want to delete this data ?');
+      if (r == true) {
+        axios.post(self.baseURL + 'tasks/delete', { id: id_task }).then((res) => {
+          self.getMyTaskList();
+        });
+      }
+    }
   },
 	mounted() {
     this.getMyTaskList();

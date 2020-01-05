@@ -38,4 +38,15 @@ class Tasks extends CI_Controller {
 	public function get($id_user){
 		echo json_encode($this->Tasks_model->get($id_user));
 	}
+
+	public function delete(){
+		$json = file_get_contents('php://input');
+		$data = json_decode($json);
+		$this->Tasks_model->delete($data->id);
+		
+		$output = array(
+			'success' => true
+		);
+		echo json_encode($output);
+	}
 }

@@ -51,7 +51,7 @@ class Tasks_model extends CI_Model {
     }
 	
 	public function delete($id){
-        return $this->db->where('id', $id)->delete('sport_match');
+        return $this->db->where('id', $id)->delete('tasks');
     }
 
     // Transaction
