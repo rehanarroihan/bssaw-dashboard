@@ -11,7 +11,7 @@ class Tasks_model extends CI_Model {
             'id_user'      => $id_user
 		);
 
-		$this->db->insert('users', $data);
+		$this->db->insert('tasks', $data);
 		if($this->db->affected_rows() > 0){
 			return true;
 		}else{

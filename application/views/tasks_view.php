@@ -60,7 +60,7 @@
               <div class="input-group-prepend">
                 <span class="input-group-text"><i class="far fa-clock"></i></span>
               </div>
-              <date-picker v-model="newTaskData.start_time" :config="datePickerOption"></date-picker>
+              <date-picker v-model="newTaskData.start_time" @dp-change="onStartDateChange" :config="datePickerOption"></date-picker>
             </div>
           </div>
           <div class="form-group">
@@ -69,7 +69,7 @@
               <div class="input-group-prepend">
                 <span class="input-group-text"><i class="far fa-clock"></i></span>
               </div>
-              <date-picker v-model="newTaskData.end_time" :config="datePickerOption"></date-picker>
+              <date-picker v-model="newTaskData.end_time" @dp-change="onEndDateChange" :config="datePickerOption"></date-picker>
             </div>
           </div>
         </div>
@@ -163,7 +163,7 @@ var app = new Vue({
     newTaskData: {
       type: '',
       full_name: '<?php echo $this->session->userdata('full_name') ?>',
-      user_id: '<?php echo $this->session->userdata('user_id') ?>',
+      id_user: '<?php echo $this->session->userdata('user_id') ?>',
       start_time: new Date(),
       end_time: '',
     },
@@ -175,6 +175,14 @@ var app = new Vue({
     }  
 	},
 	methods: {
+    onStartDateChange(e) {
+      this.start_time = moment(e.date._i, 'dddd, DD MMMM YYYY - HH:mm').format('YYYY-MM-DD hh:mm:ss');
+    },
+
+    onEndDateChange(e) {
+      this.start_time = moment(e.date._i, 'dddd, DD MMMM YYYY - HH:mm').format('YYYY-MM-DD hh:mm:ss');
+    },
+
     toggleAddNewTask() {
       this.isAddTask = !this.isAddTask;
     },
@@ -185,7 +193,7 @@ var app = new Vue({
 
     getMyTaskList() {
       const self = this;
-      self.employeeList = [];
+      self.taskList = [];
       axios.post(self.baseURL + 'tasks/get/' + '<?php echo $this->session->userdata('user_id') ?>').then((res) => {
         if (res.data.length === 0) { return; }
         // converting to bettter format
@@ -218,21 +226,20 @@ var app = new Vue({
     submitNewTask() {
       //if (this.$v.$invalid) { return; }
       this.isAddTaskLoading = true;
+
       const self = this;
-      console.log(this.newTaskData);
-      /* axios.post(self.baseURL + 'employees/insert',
-        self.newEmployeeData).then(() => {
+      axios.post(self.baseURL + 'tasks/insert', self.newTaskData).then(() => {
         self.isAddTaskLoading = false;
         self.newTaskData = {
           type: '',
-          full_name: '<?php //echo $this->session->userdata('full_name') ?>',
-          user_id: '<?php //echo $this->session->userdata('user_id') ?>',
-          start_time: '',
+          full_name: '<?php echo $this->session->userdata('full_name') ?>',
+          id_user: '<?php echo $this->session->userdata('user_id') ?>',
+          start_time: new Date(),
           end_time: '',
         },
-        //self.isAddEmployee = false;
-        self.getEmployeeList();
-      }); */
+        self.isAddTaskLoading = false;
+        self.getMyTaskList();
+      });
     },
   },
 	mounted() {
