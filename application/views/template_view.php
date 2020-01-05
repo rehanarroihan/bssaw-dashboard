@@ -140,5 +140,37 @@
 <script src="<?php echo base_url() ?>assets/dist/js/adminlte.js"></script>
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 <!-- <script src="<?php //echo base_url() ?>assets/dist/js/pages/dashboard.js"></script> -->
+<script>
+window.addEventListener("load", function () {
+  $.fn.datetimepicker.Constructor.Default = $.extend({},
+    $.fn.datetimepicker.Constructor.Default, {
+      icons: { 
+        time: 'fas fa-clock',
+        date: 'fas fa-calendar',
+        up: 'fas fa-arrow-up',
+        down: 'fas fa-arrow-down',
+        previous: 'fas fa-arrow-circle-left',
+        next: 'fas fa-arrow-circle-right',
+        today: 'far fa-calendar-check-o',
+        clear: 'fas fa-trash',
+        close: 'far fa-times'
+      },
+      format: 'dddd, DD MMMM YYYY - HH:mm',
+    });  
+  
+  $('#datetimepicker7').datetimepicker();
+  $('#datetimepicker8').datetimepicker({
+      useCurrent: false
+  });
+  $("#datetimepicker7").on("change.datetimepicker", function (e) {
+      $('#datetimepicker8').datetimepicker('minDate', e.date);
+      console.log(e.date);
+  });
+  $("#datetimepicker8").on("change.datetimepicker", function (e) {
+      $('#datetimepicker7').datetimepicker('maxDate', e.date);
+      console.log(e.date);
+  });
+});
+</script>
 </body>
 </html>

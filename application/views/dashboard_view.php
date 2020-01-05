@@ -82,7 +82,7 @@
             <div class="input-group-prepend">
               <span class="input-group-text"><i class="far fa-clock"></i></span>
             </div>
-            <input type="text" class="form-control float-right" id="reservationtime">
+            <input type="text" class="form-control float-right" id="report-range">
           </div>
         </div>
         <!-- result info -->
@@ -196,13 +196,16 @@
 <script>
 document.addEventListener('DOMContentLoaded', function(){ 
   $('#reportTable').DataTable();
-  $('#reservationtime').daterangepicker({
+  $('#report-range').daterangepicker({
     timePicker: true,
     timePickerIncrement: 30,
     locale: {
-      format: 'MM/DD/YYYY hh:mm A'
+      format: 'dddd, DD MMMM YYYY HH:mm'
     }
-  })
+  });
+  $('#report-range').on('apply.daterangepicker', function(ev, picker) {
+    // callback on apply date range
+  });
 }, false);
 
 var app = new Vue({

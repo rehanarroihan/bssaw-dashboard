@@ -40,39 +40,36 @@
             <label>Nama Anggota</label>
             <input 
               type="text"
-              v-model.trim="newTaskData.full_name"
+              v-model="newTaskData.full_name"
               disabled
               class="form-control">
           </div>
           <div class="form-group">
             <label>Jenis Pekerjaan</label>
-            <select class="form-control" @change="taskTypeOnChange" v-bind:class="{ 'is-invalid': !$v.newTaskData.type.required }">
+            <select class="form-control" @change="taskTypeOnChange">
               <option>-- Pilih Jenis Pekerjaan --</option>
               <option
                 v-for="(item, index) in taskTypeList"
                 :key="item.id"
                 :value="item.id">{{ item.name }}</option>
             </select>
-            <div class="invalid-feedback">
-              Tipe pekerjaan harus di isi
-            </div>
           </div>
           <div class="form-group">
             <label>Waktu Mulai</label>
-            <div class="input-group">
+            <div class="input-group" data-target-input="nearest">
               <div class="input-group-prepend">
                 <span class="input-group-text"><i class="far fa-clock"></i></span>
               </div>
-              <input type="text" class="form-control float-right anyong">
+              <input type="text" v-model.lazy="newTaskData.start_date" @change="$emit('update:newTaskData.start_date', $event.target.value)" class="form-control datetimepicker-input" id="datetimepicker7" data-toggle="datetimepicker" data-target="#datetimepicker7"/>
             </div>
           </div>
           <div class="form-group">
             <label>Waktu Selesai</label>
-            <div class="input-group">
+            <div class="input-group" data-target-input="nearest">
               <div class="input-group-prepend">
                 <span class="input-group-text"><i class="far fa-clock"></i></span>
               </div>
-              <input type="text" class="form-control float-right anyong">
+              <input type="text" v-model="newTaskData.end_date" class="form-control datetimepicker-input" id="datetimepicker8" data-toggle="datetimepicker" data-target="#datetimepicker8"/>
             </div>
           </div>
         </div>
@@ -133,22 +130,26 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function(){ 
-  $('.anyong').daterangepicker({
-    timePicker: true,
-    timePickerIncrement: 30,
-    locale: {
-      format: 'MM/DD/YYYY hh:mm A'
-    }
-  });
-}, false);
-</script>
+Vue.directive('model-inject', {
+  bind: function(el, binding, vnode) {
+    el.value = vnode.context[binding.expression];
 
-<script>
+    // Create inject event and add it to Vue instance (available by this.injectEvent)
+    vnode.context.injectEvent = new CustomEvent("input");
+    // Attach custom event to el
+    el.addEventListener('inject', function() {
+        vnode.context[binding.expression] = el.value;
+    });
 
-//use vuelidate
-Vue.use(window.vuelidate.default);
-const { required, minLength } = window.validators;
+    // Also bind input
+    el.addEventListener('input', function() {
+        vnode.context[binding.expression] = el.value;
+    });
+  },
+  update: function(el, binding, vnode) {
+    el.value = vnode.context[binding.expression];
+  }
+});
 
 var app = new Vue({
 	el: '#app',
@@ -187,19 +188,6 @@ var app = new Vue({
     },
     isAddTaskLoading: false
 	},
-  validations: {
-    newTaskData: {
-      type: {
-        required,
-      },
-      start_time: {
-        required,
-      },
-      end_time: {
-        required,
-      },
-    },
-  },
 	methods: {
     toggleAddNewTask() {
       this.isAddTask = !this.isAddTask;
@@ -238,14 +226,15 @@ var app = new Vue({
     },
 
     convertDateFormat(oldFormat) {
-      return moment(oldFormat).lang('id').format('dddd, DD MMMM YYYY | HH:mm');
+      return moment(oldFormat).lang('id').format('dddd, DD MMMM YYYY - HH:mm');
     },
 
     submitNewTask() {
-      /* if (this.$v.$invalid) { return; }
+      //if (this.$v.$invalid) { return; }
       this.isAddTaskLoading = true;
       const self = this;
-      axios.post(self.baseURL + 'employees/insert',
+      console.log(this.newTaskData);
+      /* axios.post(self.baseURL + 'employees/insert',
         self.newEmployeeData).then(() => {
         self.isAddTaskLoading = false;
         self.newTaskData = {
