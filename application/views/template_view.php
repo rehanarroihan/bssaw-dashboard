@@ -10,8 +10,6 @@
   <link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/fontawesome-free/css/all.min.css">
   <!-- Ionicons -->
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-  <!-- Tempusdominus Bbootstrap 4 -->
-  <link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
   <!-- iCheck -->
   <link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
   <!-- JQVMap -->
@@ -27,6 +25,15 @@
   <link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/summernote/summernote-bs4.css">
   <!-- Google Font: Source Sans Pro -->
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+  <!-- Date-picker dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.22"></script>
+  <!-- Date-picker itself -->
+  <script src="https://cdn.jsdelivr.net/npm/pc-bootstrap4-datetimepicker@4.17/build/js/bootstrap-datetimepicker.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/pc-bootstrap4-datetimepicker@4.17/build/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+  <!-- Lastly add this package -->
+  <script src="https://cdn.jsdelivr.net/npm/vue-bootstrap-datetimepicker@5"></script>
 
   <!-- Modern JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
@@ -122,14 +129,11 @@
 </div>
 <!-- ./wrapper -->
 
-<!-- jQuery -->
-<script src="<?php echo base_url() ?>assets/plugins/jquery/jquery.min.js"></script>
 <!-- jQuery UI 1.11.4 -->
 <script src="<?php echo base_url() ?>assets/plugins/jquery-ui/jquery-ui.min.js"></script>
 <!-- Bootstrap 4 -->
 <script src="<?php echo base_url() ?>assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <!-- daterangepicker -->
-<script src="<?php echo base_url() ?>assets/plugins/moment/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/locale/id.js" integrity="sha256-5aLk1fogTLyWd3GNewO2j33+AtT02NYcGkkskO+3EQQ=" crossorigin="anonymous"></script>
 <script src="<?php echo base_url() ?>assets/plugins/daterangepicker/daterangepicker.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.0.5/daterangepicker.min.js" integrity="sha256-zI6VVO07NPmVW11q3RQE42YbRmJIkkunrcQ9LEYxJsQ=" crossorigin="anonymous"></script>
@@ -137,8 +141,6 @@
 <script src="<?php echo base_url() ?>assets/plugins/datatables/jquery.dataTables.js"></script>
 <script src="<?php echo base_url() ?>assets/plugins/datatables-bs4/js/dataTables.bootstrap4.js"></script>
 
-<!-- Tempusdominus Bootstrap 4 -->
-<script src="<?php echo base_url() ?>assets/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
 <!-- overlayScrollbars -->
 <script src="<?php echo base_url() ?>assets/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
 <!-- AdminLTE App -->
@@ -147,33 +149,18 @@
 <!-- <script src="<?php //echo base_url() ?>assets/dist/js/pages/dashboard.js"></script> -->
 <script>
 window.addEventListener("load", function () {
-  $.fn.datetimepicker.Constructor.Default = $.extend({},
-    $.fn.datetimepicker.Constructor.Default, {
-      icons: { 
-        time: 'fas fa-clock',
-        date: 'fas fa-calendar',
-        up: 'fas fa-arrow-up',
-        down: 'fas fa-arrow-down',
-        previous: 'fas fa-arrow-circle-left',
-        next: 'fas fa-arrow-circle-right',
-        today: 'far fa-calendar-check-o',
-        clear: 'fas fa-trash',
-        close: 'far fa-times'
-      },
-      format: 'dddd, DD MMMM YYYY - HH:mm',
-    });  
-  
-  $('#datetimepicker7').datetimepicker();
-  $('#datetimepicker8').datetimepicker({
-      useCurrent: false
-  });
-  $("#datetimepicker7").on("change.datetimepicker", function (e) {
-      $('#datetimepicker8').datetimepicker('minDate', e.date);
-      console.log(e.date);
-  });
-  $("#datetimepicker8").on("change.datetimepicker", function (e) {
-      $('#datetimepicker7').datetimepicker('maxDate', e.date);
-      console.log(e.date);
+  jQuery.extend(true, jQuery.fn.datetimepicker.defaults, {
+    icons: {
+      time: 'far fa-clock',
+      date: 'far fa-calendar',
+      up: 'fas fa-arrow-up',
+      down: 'fas fa-arrow-down',
+      previous: 'fas fa-chevron-left',
+      next: 'fas fa-chevron-right',
+      today: 'fas fa-calendar-check',
+      clear: 'far fa-trash-alt',
+      close: 'far fa-times-circle'
+    }
   });
 });
 </script>

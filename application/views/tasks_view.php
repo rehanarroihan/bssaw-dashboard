@@ -60,7 +60,7 @@
               <div class="input-group-prepend">
                 <span class="input-group-text"><i class="far fa-clock"></i></span>
               </div>
-              <input type="text" v-model.lazy="newTaskData.start_date" @change="$emit('update:newTaskData.start_date', $event.target.value)" class="form-control datetimepicker-input" id="datetimepicker7" data-toggle="datetimepicker" data-target="#datetimepicker7"/>
+              <date-picker v-model="newTaskData.start_time" :config="datePickerOption"></date-picker>
             </div>
           </div>
           <div class="form-group">
@@ -69,7 +69,7 @@
               <div class="input-group-prepend">
                 <span class="input-group-text"><i class="far fa-clock"></i></span>
               </div>
-              <input type="text" v-model="newTaskData.end_date" class="form-control datetimepicker-input" id="datetimepicker8" data-toggle="datetimepicker" data-target="#datetimepicker8"/>
+              <date-picker v-model="newTaskData.end_time" :config="datePickerOption"></date-picker>
             </div>
           </div>
         </div>
@@ -130,26 +130,7 @@
 </div>
 
 <script>
-Vue.directive('model-inject', {
-  bind: function(el, binding, vnode) {
-    el.value = vnode.context[binding.expression];
-
-    // Create inject event and add it to Vue instance (available by this.injectEvent)
-    vnode.context.injectEvent = new CustomEvent("input");
-    // Attach custom event to el
-    el.addEventListener('inject', function() {
-        vnode.context[binding.expression] = el.value;
-    });
-
-    // Also bind input
-    el.addEventListener('input', function() {
-        vnode.context[binding.expression] = el.value;
-    });
-  },
-  update: function(el, binding, vnode) {
-    el.value = vnode.context[binding.expression];
-  }
-});
+Vue.component('date-picker', VueBootstrapDatetimePicker);
 
 var app = new Vue({
 	el: '#app',
@@ -183,10 +164,15 @@ var app = new Vue({
       type: '',
       full_name: '<?php echo $this->session->userdata('full_name') ?>',
       user_id: '<?php echo $this->session->userdata('user_id') ?>',
-      start_time: '',
+      start_time: new Date(),
       end_time: '',
     },
-    isAddTaskLoading: false
+    isAddTaskLoading: false,
+    datePickerOption: {
+      format: 'dddd, DD MMMM YYYY - HH:mm',
+      useCurrent: false,
+      locale: 'id'
+    }  
 	},
 	methods: {
     toggleAddNewTask() {
