@@ -26,6 +26,8 @@ class Tasks extends CI_Controller {
 			$data->type,
 			$data->start_time,
 			$data->end_time,
+			$data->note,
+			$data->attachment,
 			$data->id_user
 		);
 
@@ -33,6 +35,19 @@ class Tasks extends CI_Controller {
 			'success' => true
 		);
 		echo json_encode($output);
+	}
+
+	public function uploadSingleFile() {
+		$config['upload_path']          = './assets/upload/';
+		$config['overwrite']						= true;
+		$config['allowed_types']        = 'gif|jpg|png|docx|pptx|doc|pdf';
+		$config['max_size']             = 8024; // 1MB
+
+		$this->load->library('upload', $config);
+
+		if ($this->upload->do_upload('file')) {
+			echo $this->upload->data("file_name");
+		}
 	}
 
 	public function get($id_user){

@@ -72,6 +72,41 @@
               <date-picker v-model="endTimeInput" @dp-change="onEndDateChange" :config="endDatePickerOption"></date-picker>
             </div>
           </div>
+          <div class="form-group">
+            <label>Catatan</label>
+            <textarea
+              type="text"
+              v-model="newTaskData.note"
+              class="form-control">
+            </textarea>
+          </div>
+          <div class="form-group">
+            <label>Dokumen</label>
+            <!-- show when file not choosen -->
+            <div class="input-group" v-if="!file">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><i class="far fa-file"></i></span>
+              </div>
+              <div class="custom-file">
+                <input type="file" @change="onFileChange()" ref="file" id="file" class="custom-file-input" accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
+                <label class="custom-file-label" for="exampleInputFile">Choose file</label>
+              </div>
+              <div class="input-group-append">
+              </div>
+            </div>
+            <!-- show when file choosen -->
+            <div class="input-group" v-if="file">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><i class="far fa-file"></i></span>
+              </div>
+              <input type="text" class="form-control" :value="file.name">
+              <span class="input-group-append">
+                <button type="button" @click="removeFile" class="btn btn-danger btn-flat">
+                  <i class="fa fa-times"></i>
+                </button>
+              </span>
+            </div>
+          </div>
         </div>
         <div class="card-footer">
           <button v-if="!isAddTaskLoading" type="button" class="btn btn-primary float-right" @click="submitNewTask">Submit</button>
@@ -166,7 +201,10 @@ var app = new Vue({
       id_user: '<?php echo $this->session->userdata('user_id') ?>',
       start_time: '',
       end_time: '',
+      note: '',
+      attachment: '',
     },
+    file: '',
     startTimeInput: '',
     endTimeInput: '',
     isAddTaskLoading: false,
@@ -232,11 +270,23 @@ var app = new Vue({
       return moment(oldFormat).lang('id').format('dddd, DD MMMM YYYY - HH:mm');
     },
 
-    submitNewTask() {
+    onFileChange() {
+      this.file = this.$refs.file.files[0];
+    },
+    
+    removeFile() {
+      this.file = '';
+    },
+
+    async submitNewTask() {
       //if (this.$v.$invalid) { return; }
       this.isAddTaskLoading = true;
 
       const self = this;
+      if (this.file) {
+        const uploadedFileName = await this.uploadSingleFile();
+        this.newTaskData.attachment = uploadedFileName;
+      }
       axios.post(self.baseURL + 'tasks/insert', self.newTaskData).then(() => {
         self.isAddTaskLoading = false;
         self.newTaskData = {
@@ -245,13 +295,32 @@ var app = new Vue({
           id_user: '<?php echo $this->session->userdata('user_id') ?>',
           start_time: '',
           end_time: '',
+          note: '',
+          attachment: '',
         };
         self.startTimeInput = '';
         self.endTimeInput = '';
+        self.file = '';
         self.isAddTaskLoading = false;
         self.getMyTaskList();
       });
     },
+
+    uploadSingleFile(){
+			const self = this;
+			return new Promise((resolve, reject) => {
+				let formData = new FormData();
+				formData.append('file', self.file);
+
+				axios.post(self.baseURL + 'tasks/uploadSingleFile', formData, {
+					headers: {
+						'Content-Type': 'multipart/form-data'
+					}
+				}).then(res => {
+					resolve(res.data);
+				});
+			});
+		},
 
     deleteTask(id_task) {
       const self = this;

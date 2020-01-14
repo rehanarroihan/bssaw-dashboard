@@ -3,11 +3,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Tasks_model extends CI_Model {
 
-    public function insert($type, $start_time, $end_time, $id_user){
+    public function insert($type, $start_time, $end_time, $note, $attachment, $id_user){
 		$data = array(
 			'type' => $type,
 			'start_time'  => $start_time,
             'end_time'  => $end_time,
+            'note'  => $note,
+            'attachment'  => $attachment,
             'id_user'      => $id_user
 		);
 
