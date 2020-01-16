@@ -12,9 +12,10 @@ class Tasks extends CI_Controller {
 	}
 
 	public function index(){
+		$role = $this->session->userdata('role');
 		$data = array(
 			'title' => 'Hello',
-			'content_view' => 'tasks_view'
+			'content_view' => $role == 'ADMIN' ? 'admin_tasks_view' : 'tasks_view'
 		);
 		$this->load->view('template_view', $data);
 	}

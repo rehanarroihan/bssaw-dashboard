@@ -179,7 +179,7 @@ var app = new Vue({
     },
   },
 	methods: {
-    getEmployeeList: function() {
+    getEmployeeList() {
       const self = this;
       self.employeeList = [];
       axios.post(self.baseURL + 'employees/get').then((res) => {

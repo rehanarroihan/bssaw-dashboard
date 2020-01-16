@@ -101,14 +101,12 @@
             </a>
           </li>
           <?php endif; ?>
-          <?php if($this->session->userdata('role') == 'EMPLOYEE'): ?>
           <li class="nav-item">
             <a href="<?php echo base_url() ?>dashboard/tasks" class="nav-link">
               <i class="nav-icon fa fa-tasks"></i>
               <p>Pekerjaan</p>
             </a>
           </li>
-          <?php endif; ?>
           <li class="nav-header">Other</li>
           <li class="nav-item">
             <a href="<?php echo base_url() ?>dashboard/logout" class="nav-link">

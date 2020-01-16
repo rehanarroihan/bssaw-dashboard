@@ -37,12 +37,15 @@
         </div>
         <div class="card-body">
           <div class="form-group">
-            <label>Nama Anggota</label>
-            <input 
-              type="text"
-              v-model="newTaskData.full_name"
-              disabled
-              class="form-control">
+            <label>Nama Petugas</label>
+            <select class="form-control">
+              <option value="">-- Pilih Petugas --</option>
+              <option
+                v-for="(empItem, empIndex) in employeeList"
+                :value="empItem.id_user">
+                {{ empItem.full_name }}
+              </option>
+            </select>
           </div>
           <div class="form-group">
             <label>Jenis Pekerjaan</label>
@@ -142,7 +145,7 @@
     <div v-bind:class="{ 'col-md-12': !isAddTask, 'col-md-7': isAddTask }">
       <div class="card">
         <div class="card-header border-transparent">
-          <h3 class="card-title">Daftar Pekerjaan Saya</h3>
+          <h3 class="card-title">Daftar Semua Pekerjaan</h3>
         </div>
         <!-- /.card-header -->
         <div class="card-body p-0">
@@ -197,6 +200,7 @@ var app = new Vue({
 	el: '#app',
 	data: {
     baseURL: '<?php echo base_url() ?>',
+    employeeList: [],
     taskList: [],
     isAddTask: false,
     taskTypeList: [
@@ -294,6 +298,25 @@ var app = new Vue({
       });
     },
 
+    getEmployeeList() {
+      const self = this;
+      self.employeeList = [];
+      axios.post(self.baseURL + 'employees/get').then((res) => {
+        if (res.data.length === 0) { return; }
+        // converting to bettter format
+        for (let i = 0; res.data.length; i++) {
+          const number = i + 1;
+          let newFormat = {
+            no: number,
+            id_user: res.data[i].id_user,
+            full_name: res.data[i].full_name,
+            username: res.data[i].username,
+          };
+          self.employeeList.push(newFormat);
+        }
+      });
+    },
+
     convertTitleCase(string) {
       str = string.toLowerCase().split(' ');
       for (var i = 0; i < str.length; i++) {
@@ -370,6 +393,7 @@ var app = new Vue({
   },
 	mounted() {
     this.getMyTaskList();
+    this.getEmployeeList();
 	}
 });
 </script>
