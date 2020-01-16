@@ -225,7 +225,7 @@ var app = new Vue({
       console.log(id);
     }
   },
-	mounted: function() {
+	mounted() {
     this.getEmployeeList();
 	}
 });

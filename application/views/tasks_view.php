@@ -46,13 +46,16 @@
           </div>
           <div class="form-group">
             <label>Jenis Pekerjaan</label>
-            <select class="form-control" @change="taskTypeOnChange">
-              <option>-- Pilih Jenis Pekerjaan --</option>
+            <select class="form-control" v-bind:class="{ 'is-invalid': !$v.newTaskData.type.required }" @change="taskTypeOnChange">
+              <option value="">-- Pilih Jenis Pekerjaan --</option>
               <option
                 v-for="(item, index) in taskTypeList"
                 :key="item.id"
                 :value="item.id">{{ item.name }}</option>
             </select>
+            <div class="invalid-feedback">
+              Pilih jenis pekerjaan
+            </div>
           </div>
           <div class="form-group">
             <label>Waktu Mulai</label>
@@ -60,7 +63,15 @@
               <div class="input-group-prepend">
                 <span class="input-group-text"><i class="far fa-clock"></i></span>
               </div>
-              <date-picker v-model="startTimeInput" @dp-change="onStartDateChange" :config="startDatePickerOption"></date-picker>
+              <date-picker
+                v-model="startTimeInput"
+                @dp-change="onStartDateChange"
+                v-bind:class="{ 'is-invalid': !$v.startTimeInput.required }"
+                :config="startDatePickerOption">
+              </date-picker>
+              <div class="invalid-feedback">
+                Waktu mulai harus di isi
+              </div>
             </div>
           </div>
           <div class="form-group">
@@ -69,7 +80,15 @@
               <div class="input-group-prepend">
                 <span class="input-group-text"><i class="far fa-clock"></i></span>
               </div>
-              <date-picker v-model="endTimeInput" @dp-change="onEndDateChange" :config="endDatePickerOption"></date-picker>
+              <date-picker
+                v-model="endTimeInput"
+                @dp-change="onEndDateChange"
+                v-bind:class="{ 'is-invalid': !$v.endTimeInput.required }"
+                :config="endDatePickerOption">
+              </date-picker>
+              <div class="invalid-feedback">
+                Waktu selesai harus di isi
+              </div>
             </div>
           </div>
           <div class="form-group">
@@ -167,6 +186,10 @@
 <script>
 Vue.component('date-picker', VueBootstrapDatetimePicker);
 
+//use vuelidate
+Vue.use(window.vuelidate.default);
+const { required, minLength } = window.validators;
+
 var app = new Vue({
 	el: '#app',
 	data: {
@@ -218,6 +241,16 @@ var app = new Vue({
       locale: 'id'
     }  
 	},
+  validations: {
+    newTaskData: {
+      type: { required },
+      start_time: { required},
+      end_time: { required },
+      note: { required }
+    },
+    startTimeInput: { required },
+    endTimeInput: { required },
+  },
 	methods: {
     onStartDateChange(e) {
       this.newTaskData.start_time = moment(this.startTimeInput, 'dddd, DD MMMM YYYY - HH:mm:ss').format('YYYY-MM-DD HH:mm');
@@ -279,7 +312,7 @@ var app = new Vue({
     },
 
     async submitNewTask() {
-      //if (this.$v.$invalid) { return; }
+      if (this.$v.$invalid) { return; }
       this.isAddTaskLoading = true;
 
       const self = this;
