@@ -136,7 +136,117 @@
         </div>
       </div>
     </div>
-    <div v-bind:class="{ 'col-md-12': !isAddTask, 'col-md-7': isAddTask }">
+    <div class="col-md-5" v-if="isEditTask">
+      <div class="card card-success">
+        <div class="card-header">
+          <h3 class="card-title">Edit Task</h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" @click="toggleEditTask"><i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label>Nama Anggota</label>
+            <input 
+              type="text"
+              v-model="editTaskData.full_name"
+              disabled
+              class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Jenis Pekerjaan</label>
+            <select class="form-control" v-bind:class="{ 'is-invalid': !$v.editTaskData.type.required }" v-model="editTaskData.type">
+              <option value="">-- Pilih Jenis Pekerjaan --</option>
+              <option
+                v-for="(item, index) in taskTypeList"
+                :key="item.id"
+                :value="item.id">{{ item.name }}</option>
+            </select>
+            <div class="invalid-feedback">
+              Pilih jenis pekerjaan
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Waktu Mulai</label>
+            <div class="input-group" data-target-input="nearest">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><i class="far fa-clock"></i></span>
+              </div>
+              <date-picker
+                v-model="startTimeInput"
+                @dp-change="onStartDateChange"
+                v-bind:class="{ 'is-invalid': !$v.startTimeInput.required }"
+                :config="startDatePickerOption">
+              </date-picker>
+              <div class="invalid-feedback">
+                Waktu mulai harus di isi
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Waktu Selesai</label>
+            <div class="input-group" data-target-input="nearest">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><i class="far fa-clock"></i></span>
+              </div>
+              <date-picker
+                v-model="endTimeInput"
+                @dp-change="onEndDateChange"
+                v-bind:class="{ 'is-invalid': !$v.endTimeInput.required }"
+                :config="endDatePickerOption">
+              </date-picker>
+              <div class="invalid-feedback">
+                Waktu selesai harus di isi
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Catatan</label>
+            <textarea
+              type="text"
+              v-model="editTaskData.note"
+              class="form-control">
+            </textarea>
+          </div>
+          <div class="form-group">
+            <label>Dokumen</label>
+            <!-- show when file not choosen -->
+            <div class="input-group" v-if="!file">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><i class="far fa-file"></i></span>
+              </div>
+              <div class="custom-file">
+                <input type="file" @change="onFileChange()" ref="file" id="file" class="custom-file-input" accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
+                <label class="custom-file-label" for="exampleInputFile">Choose file</label>
+              </div>
+              <div class="input-group-append">
+              </div>
+            </div>
+            <!-- show when file choosen -->
+            <div class="input-group" v-if="file">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><i class="far fa-file"></i></span>
+              </div>
+              <input type="text" class="form-control" :value="file.name">
+              <span class="input-group-append">
+                <button type="button" @click="removeFile" class="btn btn-danger btn-flat">
+                  <i class="fa fa-times"></i>
+                </button>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button v-if="!isAddTaskLoading" type="button" class="btn btn-primary float-right" @click="submitNewTask">Submit</button>
+          <button v-if="isAddTaskLoading" class="btn btn-primary float-right" type="button" disabled="false">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Loading...
+          </button>
+        </div>
+      </div>
+    </div>
+    <div v-bind:class="{ 'col-md-12': !isAddTask && !isEditTask, 'col-md-7': isAddTask || isEditTask }">
       <div class="card">
         <div class="card-header border-transparent">
           <h3 class="card-title">Daftar Pekerjaan Saya</h3>
@@ -196,6 +306,7 @@ var app = new Vue({
     baseURL: '<?php echo base_url() ?>',
     taskList: [],
     isAddTask: false,
+    isEditTask: false,
     taskTypeList: [
       {
         id: 'MAINTENANCE',
@@ -218,6 +329,7 @@ var app = new Vue({
         name: 'BTS'
       }
     ],
+    // data for new task
     newTaskData: {
       type: '',
       full_name: '<?php echo $this->session->userdata('full_name') ?>',
@@ -231,6 +343,10 @@ var app = new Vue({
     startTimeInput: '',
     endTimeInput: '',
     isAddTaskLoading: false,
+    // data for edit task
+    editTaskData: {},
+    startTimeEditInput: '',
+    endTimeEditInput: '',
     startDatePickerOption: {
       format: 'dddd, DD MMMM YYYY - HH:mm',
       locale: 'id'
@@ -243,6 +359,12 @@ var app = new Vue({
 	},
   validations: {
     newTaskData: {
+      type: { required },
+      start_time: { required},
+      end_time: { required },
+      note: { required }
+    },
+    editTaskData: {
       type: { required },
       start_time: { required},
       end_time: { required },
@@ -264,6 +386,12 @@ var app = new Vue({
 
     toggleAddNewTask() {
       this.isAddTask = !this.isAddTask;
+      this.isEditTask = false;
+    },
+
+    toggleEditTask() {
+      this.isEditTask = !this.isEditTask;
+      this.isAddTask = false;
     },
     
     taskTypeOnChange(event) {
@@ -312,6 +440,7 @@ var app = new Vue({
     },
 
     async submitNewTask() {
+      console.log(this.$v);
       if (this.$v.$invalid) { return; }
       this.isAddTaskLoading = true;
 
@@ -355,12 +484,21 @@ var app = new Vue({
 			});
 		},
 
+    editTask(willEditTaskItem) {
+      this.isAddTask = false;
+      this.isEditTask = true;
+      this.editTaskData = willEditTaskItem;
+      this.editTaskData.full_name = '<?php echo $this->session->userdata('full_name') ?>';
+    },
+
     deleteTask(id_task) {
       const self = this;
       let r = confirm('Are you sure want to delete this data ?');
       if (r == true) {
         axios.post(self.baseURL + 'tasks/delete', { id: id_task }).then((res) => {
           self.getMyTaskList();
+          self.editTaskData = {};
+          self.isEditTask = false;
         });
       }
     }
