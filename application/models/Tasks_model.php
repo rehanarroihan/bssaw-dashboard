@@ -22,7 +22,7 @@ class Tasks_model extends CI_Model {
     }
     
     public function get($id_user){
-        if ($id_user != null) {
+        if ($id_user != "xx") {
             $query = $this->db
                     ->select('id, type, start_time, end_time')
                     ->where('id_user', $id_user)
@@ -30,9 +30,10 @@ class Tasks_model extends CI_Model {
                     ->result();
         } else {
             $query = $this->db
-                    ->select('id, type, start_time, end_time')
-                    ->get('tasks')
-                    ->result();
+                ->select('tasks.id AS id, type, start_time, end_time, users.id AS id_user, users.full_name AS employee, tasks.attachment, tasks.note')
+                ->join('users', 'users.id = tasks.id_user')
+                ->order_by('start_time', 'desc')
+                ->get('tasks')->result();
         }
         return $query;
     }

@@ -38,7 +38,7 @@
         <div class="card-body">
           <div class="form-group">
             <label>Nama Petugas</label>
-            <select class="form-control">
+            <select class="form-control" @change="employeeOnChange" v-bind:class="{ 'is-invalid': !$v.newTaskData.id_user.required }">
               <option value="">-- Pilih Petugas --</option>
               <option
                 v-for="(empItem, empIndex) in employeeList"
@@ -46,6 +46,9 @@
                 {{ empItem.full_name }}
               </option>
             </select>
+            <div class="invalid-feedback">
+              Pilih petugas
+            </div>
           </div>
           <div class="form-group">
             <label>Jenis Pekerjaan</label>
@@ -154,21 +157,26 @@
               <thead>
                 <tr>
                   <th>No</th>
+                  <th>Petugas</th>
                   <th>Jenis Tugas</th>
                   <th>Waktu Mulai</th>
                   <th>Waktu Selesai</th>
+                  <th>Catatan</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(item, idx) in taskList">
                   <td>{{ item.no }}</td>
+                  <td>{{ item.employee }}</td>
                   <td>{{ convertTitleCase(item.type) }}</td>
                   <td>{{ convertDateFormat(item.start_time) }}</td>
-                  <td>{{ convertDateFormat(item.end_time) }}</td>
+                  <td>{{ convertDateFormat(item.start_time) }}</td>
+                  <td>{{ item.note }}</td>
                   <td>
                     <button @click="editTask(item)" class="btn btn-xs btn-success"><i class="fa fa-edit"></i> Edit</button>
                     <button @click="deleteTask(item.id_task)" class="btn btn-xs btn-danger"><i class="fa fa-trash"></i> Delete</button>
+                    <a v-if="item.attachment" target="_blank" :href="getAttachmentLink(item.attachment)" class="btn btn-xs btn-primary"><i class="fa fa-eye"></i> Attachment</a>
                   </td>
                 </tr>
               </tbody>
@@ -227,8 +235,7 @@ var app = new Vue({
     ],
     newTaskData: {
       type: '',
-      full_name: '<?php echo $this->session->userdata('full_name') ?>',
-      id_user: '<?php echo $this->session->userdata('user_id') ?>',
+      id_user: '',
       start_time: '',
       end_time: '',
       note: '',
@@ -251,6 +258,7 @@ var app = new Vue({
   validations: {
     newTaskData: {
       type: { required },
+      id_user: { required },
       start_time: { required},
       end_time: { required },
       note: { required }
@@ -277,10 +285,14 @@ var app = new Vue({
       this.newTaskData.type = event.target.value;
     },
 
-    getMyTaskList() {
+    employeeOnChange(event) {
+      this.newTaskData.id_user = event.target.value;
+    },
+
+    getTaskList() {
       const self = this;
       self.taskList = [];
-      axios.post(self.baseURL + 'tasks/get/' + '<?php echo $this->session->userdata('user_id') ?>').then((res) => {
+      axios.post(self.baseURL + 'tasks/get/xx').then((res) => {
         if (res.data.length === 0) { return; }
         // converting to bettter format
         let willBePush = [];
@@ -292,6 +304,9 @@ var app = new Vue({
             type: res.data[i].type,
             start_time: res.data[i].start_time,
             end_time: res.data[i].end_time,
+            attachment: res.data[i].attachment,
+            employee: res.data[i].employee,
+            note: res.data[i].note,
           };
           self.taskList.push(newFormat);
         }
@@ -315,6 +330,10 @@ var app = new Vue({
           self.employeeList.push(newFormat);
         }
       });
+    },
+
+    getAttachmentLink(fileName) {
+      return this.baseURL + 'assets/upload/' + fileName;
     },
 
     convertTitleCase(string) {
@@ -361,7 +380,7 @@ var app = new Vue({
         self.endTimeInput = '';
         self.file = '';
         self.isAddTaskLoading = false;
-        self.getMyTaskList();
+        self.getTaskList();
       });
     },
 
@@ -386,13 +405,13 @@ var app = new Vue({
       let r = confirm('Are you sure want to delete this data ?');
       if (r == true) {
         axios.post(self.baseURL + 'tasks/delete', { id: id_task }).then((res) => {
-          self.getMyTaskList();
+          self.getTaskList();
         });
       }
     }
   },
 	mounted() {
-    this.getMyTaskList();
+    this.getTaskList();
     this.getEmployeeList();
 	}
 });
