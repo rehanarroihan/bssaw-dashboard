@@ -338,7 +338,13 @@ var app = new Vue({
     },
     
     deleteEmployee(id) {
-      console.log(id);
+      const self = this;
+      let r = confirm('Menghapus data karyawan akan menghapus data pekerjaan mereka juga dan mengakibatkan karyawan ini tidak bisa login, lanjutkan ?');
+      if (r == true) {
+        axios.post(self.baseURL + 'employees/delete', { id }).then((res) => {
+          self.getEmployeeList();
+        });
+      }
     }
   },
 	mounted() {

@@ -48,4 +48,15 @@ class Employees extends CI_Controller {
 		); 
 		echo json_encode($output);
 	}
+
+	public function delete(){
+		$json = file_get_contents('php://input');
+		$data = json_decode($json);
+		$this->Employees_model->delete($data->id);
+		
+		$output = array(
+			'success' => true
+		);
+		echo json_encode($output);
+	}
 }
