@@ -83,7 +83,70 @@
           </div>
         </div>
       </div>
-      <div v-bind:class="{ 'col-md-12': !isAddEmployee, 'col-md-7': isAddEmployee }">
+      <div class="col-md-5" v-if="isEditEmployee">
+        <div class="card card-success">
+          <div class="card-header">
+            <h3 class="card-title">Edit Employee Data</h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" @click="toggleEditEmployee"><i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>Nama Lengkap</label>
+              <input 
+                type="text"
+                v-model.trim="editEmployeeData.full_name"
+                @keyup="generateUsernameSuggestion"
+                class="form-control"
+                v-bind:class="{ 'is-invalid': !$v.editEmployeeData.full_name.required }"
+                placeholder="Masukkan nama lengkap karyawan">
+              <div class="invalid-feedback">
+                Nama karyawan harus di isi
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Username</label>
+              <input
+                type="text"
+                v-model.trim="editEmployeeData.username"
+                class="form-control"
+                v-bind:class="{ 'is-invalid': !$v.editEmployeeData.username.required || !$v.editEmployeeData.username.minLength }"
+                placeholder="Masukkan username untuk login karyawan">
+                <div class="invalid-feedback" v-if="!$v.editEmployeeData.username.required || !$v.editEmployeeData.username.minLength">
+                  {{ errUsername }}
+                </div>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" v-model="editEmployeeData.isChangePassword" id="defaultCheck1">
+              <label class="form-check-label" for="defaultCheck1">
+                Ganti Password
+              </label>
+            </div>
+            <div class="form-group mt-2" v-if="editEmployeeData.isChangePassword">
+              <label>Password</label>
+              <input
+                type="password"
+                v-model.trim="editEmployeeData.password"
+                class="form-control"
+                v-bind:class="{ 'is-invalid': !$v.editEmployeeData.password.required || !$v.editEmployeeData.password.minLength }"
+                placeholder="Masukkan password untuk login karyawan">
+                <div class="invalid-feedback" v-if="!$v.editEmployeeData.password.required || !$v.editEmployeeData.password.minLength">
+                  {{ errPassword }}
+                </div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button v-if="!isAddEmployeeLoading" type="button" class="btn btn-primary float-right" @click="submitEditEmployee">Simpan</button>
+            <button v-if="isAddEmployeeLoading" class="btn btn-primary float-right" type="button" disabled="false">
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              Loading...
+            </button>
+          </div>
+        </div>
+      </div>
+      <div v-bind:class="{ 'col-md-12': !isAddEmployee && !isEditEmployee, 'col-md-7': isAddEmployee || isEditEmployee }">
         <div class="card">
           <div class="card-header border-transparent">
             <h3 class="card-title">Employee List</h3>
@@ -143,10 +206,26 @@ var app = new Vue({
       full_name: '',
       username: '',
       password: '',
-    }
+    },
+    editEmployeeData: {},
+    isEditEmployee: false,
+    isEditEmployeeLoading: false,
 	},
   validations: {
     newEmployeeData: {
+      full_name: {
+        required,
+      },
+      username: {
+        required,
+        minLength: minLength(6)
+      },
+      password: {
+        required,
+        minLength: minLength(6)
+      },
+    },
+    editEmployeeData: {
       full_name: {
         required,
       },
@@ -197,16 +276,25 @@ var app = new Vue({
         }
       });
     },
+
     toggleAddNewEmployee() {
       this.isAddEmployee = !this.isAddEmployee;
+      this.isEditEmployee = false;
     },
+
+    toggleEditEmployee() {
+      this.isEditEmployee = !this.isEditEmployee;
+      this.isAddEmployee = false;
+    },
+    
     generateUsernameSuggestion() {
       let full_name = this.newEmployeeData.full_name;
       const firstWord = full_name.replace(/ .*/, '');
       this.newEmployeeData.username = firstWord.toLowerCase();
     },
+    
     submitNewEmployee() {
-      if (this.$v.$invalid) { return; }
+      if (this.$v.newEmployeeData.$invalid) { return; }
       this.isAddEmployeeLoading = true;
       const self = this;
       axios.post(self.baseURL + 'employees/insert',
@@ -221,6 +309,34 @@ var app = new Vue({
         self.getEmployeeList();
       });
     },
+    
+    submitEditEmployee() {
+      // ensure validation
+      const dataValidation = this.$v.editEmployeeData;
+      if (this.editEmployeeData.isChangePassword) {
+        if (this.$v.editEmployeeData.password.$invalid) { return; }
+      } else {
+        this.editEmployeeData.isChangePassword = false;
+        if (dataValidation.full_name.$invalid || dataValidation.username.$invalid) { return; }
+      }
+
+      this.isEditEmployeeLoading = true;
+
+      const self = this;
+      axios.post(self.baseURL + 'employees/update',
+        self.editEmployeeData).then(() => {
+        self.isEditEmployeeLoading = false;
+        self.isEditEmployee = false;
+        self.getEmployeeList();
+      });
+    },
+    
+    editEmployee(item) {
+      this.isAddEmployee = false;
+      this.isEditEmployee = true;
+      this.editEmployeeData = JSON.parse(JSON.stringify(item));
+    },
+    
     deleteEmployee(id) {
       console.log(id);
     }

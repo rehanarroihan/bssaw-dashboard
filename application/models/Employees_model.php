@@ -18,6 +18,28 @@ class Employees_model extends CI_Model {
 			return false;
 		}
     }
+
+    public function update($param){
+        $willSubmit = array();
+        if ($param->isChangePassword) {
+            $willSubmit = array(
+                'full_name' => $param->full_name,
+                'username'  => $param->username,
+                'password'  => md5($param->password)
+            );
+        } else {
+            $willSubmit = array(
+                'full_name' => $param->full_name,
+                'username'  => $param->username
+            );
+        }
+		$this->db->where('id', $param->id_user)->update('users', $willSubmit);
+		if($this->db->affected_rows() > 0){
+			return true;
+		}else{
+			return false;
+		}
+    }
     
     public function get(){
         return $this->db
@@ -27,42 +49,7 @@ class Employees_model extends CI_Model {
                     ->result();
     }
 	
-	public function update($id, $label){
-		$data = array(
-			'label'		=> $label,
-			'slug'		=> strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $label)))
-		);
-
-		$this->db->where('id', $id)->update('sport_match', $data);
-		
-		if($this->db->affected_rows() > 0){
-			return true;
-		}else{
-			return false;
-		}
-    }
-	
 	public function delete($id){
-        return $this->db->where('id', $id)->delete('sport_match');
-    }
-
-    // Transaction
-    public function insertTransaction($array){
-		$this->db->insert('purchase_order', $array);
-		if($this->db->affected_rows() > 0){
-			return true;
-		}else{
-			return false;
-		}
-    }
-    
-    // PDF
-    public function reportData() {
-        $categoryList = $this->db->get('sport_category')->result();
-        return array(
-            'category' => $categoryList,
-            'match' => $this->get(),
-        );
-        
+        return $this->db->where('id', $id)->delete('users');
     }
 }
