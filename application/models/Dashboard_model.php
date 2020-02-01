@@ -12,6 +12,8 @@ class Dashboard_model extends CI_Model {
 							->order_by('start_time', 'desc')
 							->get('tasks')->result();
 		$result = [
+			"timeStart" => $timeStart,
+			"timeEnd" => $timeEnd,
 			"summary" => $this->getSummary($timeStart, $timeEnd),
 			"data" => $taskListQuery
 		];

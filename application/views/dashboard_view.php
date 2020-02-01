@@ -89,7 +89,9 @@
           </div>
         </div>
         <!-- result info -->
-        <h6 class="mb-2"><b>Summary</b></h6>
+        <h6 class="mb-2"><b>Summary</b>
+          ({{ convertDateFormat(reportData.timeStart) }} s/d {{  convertDateFormat(reportData.timeEnd) }})
+        </h6>
         <div class="row">
           <div class="col-md-3 col-sm-6 col-12">
             <div class="info-box">
@@ -226,6 +228,8 @@ var app = new Vue({
       }).then((res) => {
         self.reportSearchLoading = false;
         self.reportData.summary = res.data.summary;
+        self.reportData.timeStart = res.data.timeStart;
+        self.reportData.timeEnd = res.data.timeEnd;
         if (res.data.data.length === 0) { return; }
         // convert into better format
         for (let i = 0; res.data.data.length; i++) {

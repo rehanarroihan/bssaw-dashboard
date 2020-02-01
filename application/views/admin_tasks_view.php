@@ -505,7 +505,7 @@ var app = new Vue({
     },
 
     async submitNewTask() {
-      if (this.$v.$invalid) { return; }
+      if (this.$v.newTaskData.$invalid) { return; }
       this.isAddTaskLoading = true;
 
       const self = this;
