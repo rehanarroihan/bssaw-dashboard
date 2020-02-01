@@ -38,6 +38,17 @@ class Tasks extends CI_Controller {
 		echo json_encode($output);
 	}
 
+	public function update() {
+		$json = file_get_contents('php://input');
+		$data = json_decode($json);
+		$this->Tasks_model->update($data);
+
+		$output = array(
+			'success' => true
+		);
+		echo json_encode($output);
+	}
+
 	public function uploadSingleFile() {
 		$config['upload_path']          = './assets/upload/';
 		$config['overwrite']						= true;

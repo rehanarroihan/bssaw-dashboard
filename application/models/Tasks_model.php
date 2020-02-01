@@ -24,7 +24,7 @@ class Tasks_model extends CI_Model {
     public function get($id_user){
         if ($id_user != "xx") {
             $query = $this->db
-                    ->select('id, type, start_time, end_time')
+                    ->select('id, type, start_time, end_time, note, attachment')
                     ->where('id_user', $id_user)
                     ->get('tasks')
                     ->result();
@@ -38,14 +38,25 @@ class Tasks_model extends CI_Model {
         return $query;
     }
 	
-	public function update($id, $label){
-		$data = array(
-			'label'		=> $label,
-			'slug'		=> strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $label)))
-		);
-
-		$this->db->where('id', $id)->update('sport_match', $data);
-		
+	public function update($param){
+        $willSubmit = array();
+        if ($param->isEditFile) {
+            $willSubmit = array(
+                'type' => $param->type,
+                'start_time'  => $param->start_time,
+                'end_time'  => $param->end_time,
+                'note' => $param->note,
+                'attachment' => $param->attachment
+            );
+        } else {
+            $willSubmit = array(
+                'type' => $param->type,
+                'start_time'  => $param->start_time,
+                'end_time'  => $param->end_time,
+                'note' => $param->note
+            );
+        }
+		$this->db->where('id', $param->id_task)->update('tasks', $willSubmit);
 		if($this->db->affected_rows() > 0){
 			return true;
 		}else{
@@ -55,25 +66,5 @@ class Tasks_model extends CI_Model {
 	
 	public function delete($id){
         return $this->db->where('id', $id)->delete('tasks');
-    }
-
-    // Transaction
-    public function insertTransaction($array){
-		$this->db->insert('purchase_order', $array);
-		if($this->db->affected_rows() > 0){
-			return true;
-		}else{
-			return false;
-		}
-    }
-    
-    // PDF
-    public function reportData() {
-        $categoryList = $this->db->get('sport_category')->result();
-        return array(
-            'category' => $categoryList,
-            'match' => $this->get(),
-        );
-        
     }
 }
