@@ -119,7 +119,7 @@
                     <td>{{ item.job_type }}</td>
                     <td>
                       <button @click="editTaskType(item)" class="btn btn-xs btn-success"><i class="fa fa-edit"></i> Edit</button>
-                      <button @click="deleteEmployee(item.id_user)" class="btn btn-xs btn-danger"><i class="fa fa-trash"></i> Delete</button>
+                      <button @click="deleteTaskType(item.id_task_type)" class="btn btn-xs btn-danger"><i class="fa fa-trash"></i> Delete</button>
                     </td>
                   </tr>
                 </tbody>
@@ -230,6 +230,16 @@ var app = new Vue({
         self.getTaskTypeList();
       });
     },
+
+    deleteTaskType(id) {
+      const self = this;
+      let r = confirm('Menghapus data karyawan akan menghapus data pekerjaan mereka juga dan mengakibatkan karyawan ini tidak bisa login, lanjutkan ?');
+      if (r == true) {
+        axios.post(self.baseURL + 'tasktype/delete', { id }).then((res) => {
+          self.getTaskTypeList();
+        });
+      }
+    }
   },
 	mounted() {
     this.getTaskTypeList();

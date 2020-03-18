@@ -44,6 +44,6 @@ class Task_type_model extends CI_Model {
     }
 	
 	public function delete($id){
-        return $this->db->where('id', $id)->delete('users');
+        return $this->db->where('id', $id)->delete('job_type');
     }
 }

@@ -5,7 +5,6 @@ class TaskType extends CI_Controller {
 
 	public function __construct(){
 		parent::__construct();
-		$this->load->model('Tasks_model');
 		$this->load->model('Task_type_model');
 		if($this->session->userdata('logged_in') != true){
 			redirect('login');
@@ -54,7 +53,7 @@ class TaskType extends CI_Controller {
 	public function delete(){
 		$json = file_get_contents('php://input');
 		$data = json_decode($json);
-		$this->Tasks_model->delete($data->id);
+		$this->Task_type_model->delete($data->id);
 		
 		$output = array(
 			'success' => true
