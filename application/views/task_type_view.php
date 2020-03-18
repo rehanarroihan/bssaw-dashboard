@@ -79,18 +79,18 @@
               <label>Nama Jenis Pekerjaan</label>
               <input 
                 type="text"
-                v-model.trim="editEmployeeData.full_name"
-                @keyup="generateUsernameSuggestion"
+                v-model.trim="editTaskTypeData.job_type"
                 class="form-control"
-                v-bind:class="{ 'is-invalid': !$v.editEmployeeData.full_name.required }"
-                placeholder="Masukkan nama lengkap karyawan">
+                v-bind:class="{ 'is-invalid': !$v.editTaskTypeData.job_type.required }"
+                placeholder="Masukkan nama jenis pekerjaan"
+                @keyup.enter="submitEditNewTaskType">
               <div class="invalid-feedback">
                 Nama jenis pekerjaan harus di isi
               </div>
             </div>
           </div>
           <div class="card-footer">
-            <button v-if="!isEditTaskTypeLoading" type="button" class="btn btn-primary float-right" @click="submitEditEmployee">Simpan</button>
+            <button v-if="!isEditTaskTypeLoading" type="button" class="btn btn-primary float-right" @click="submitEditNewTaskType">Update</button>
             <button v-if="isEditTaskTypeLoading" class="btn btn-primary float-right" type="button" disabled="false">
               <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
               Loading...
@@ -118,7 +118,7 @@
                     <td>{{ item.no }}</td>
                     <td>{{ item.job_type }}</td>
                     <td>
-                      <button @click="editEmployee(item)" class="btn btn-xs btn-success"><i class="fa fa-edit"></i> Edit</button>
+                      <button @click="editTaskType(item)" class="btn btn-xs btn-success"><i class="fa fa-edit"></i> Edit</button>
                       <button @click="deleteEmployee(item.id_user)" class="btn btn-xs btn-danger"><i class="fa fa-trash"></i> Delete</button>
                     </td>
                   </tr>
@@ -154,7 +154,7 @@ var app = new Vue({
     newTaskTypeData: {
       task_type_name: '',
     },
-    editEmployeeData: {},
+    editTaskTypeData: {},
     isEditTaskType: false,
     isEditTaskTypeLoading: false,
 	},
@@ -164,17 +164,9 @@ var app = new Vue({
         required,
       },
     },
-    editEmployeeData: {
-      full_name: {
+    editTaskTypeData: {
+      job_type: {
         required,
-      },
-      username: {
-        required,
-        minLength: minLength(6)
-      },
-      password: {
-        required,
-        minLength: minLength(6)
       },
     }
   },
@@ -218,6 +210,23 @@ var app = new Vue({
         self.newTaskTypeData = {
           task_type_name: '',
         };
+        self.getTaskTypeList();
+      });
+    },
+
+    editTaskType(item) {
+      this.isAddTaskType = false;
+      this.isEditTaskType = true;
+      this.editTaskTypeData = JSON.parse(JSON.stringify(item));
+    },
+
+    submitEditNewTaskType() {
+      if (this.$v.editTaskTypeData.$invalid) { return; }
+      this.isEditTaskTypeLoading = true;
+      const self = this;
+      axios.post(self.baseURL + 'tasktype/update',
+        self.editTaskTypeData).then(() => {
+        self.isEditTaskTypeLoading = false;
         self.getTaskTypeList();
       });
     },

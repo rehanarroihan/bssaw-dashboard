@@ -39,7 +39,7 @@ class TaskType extends CI_Controller {
 	public function update() {
 		$json = file_get_contents('php://input');
 		$data = json_decode($json);
-		$this->Tasks_model->update($data);
+		$this->Task_type_model->update($data);
 
 		$output = array(
 			'success' => true

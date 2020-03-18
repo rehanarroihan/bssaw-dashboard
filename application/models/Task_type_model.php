@@ -23,20 +23,11 @@ class Task_type_model extends CI_Model {
     }
 
     public function update($param){
-        $willSubmit = array();
-        if ($param->isChangePassword) {
-            $willSubmit = array(
-                'full_name' => $param->full_name,
-                'username'  => $param->username,
-                'password'  => md5($param->password)
-            );
-        } else {
-            $willSubmit = array(
-                'full_name' => $param->full_name,
-                'username'  => $param->username
-            );
-        }
-		$this->db->where('id', $param->id_user)->update('users', $willSubmit);
+        $willSubmit = array(
+            'job_type' => $param->job_type,
+        );
+
+		$this->db->where('id', $param->id_task_type)->update('job_type', $willSubmit);
 		if($this->db->affected_rows() > 0){
 			return true;
 		}else{
