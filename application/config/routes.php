@@ -52,6 +52,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['dashboard/employees'] = 'employees/index';
 $route['dashboard/tasks'] = 'tasks/index';
 
+$route['dashboard/task_type'] = 'tasktype/index';
+
 $route['default_controller'] = 'dashboard';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;

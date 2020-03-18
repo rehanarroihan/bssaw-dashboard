@@ -100,6 +100,12 @@
               <p>Employees</p>
             </a>
           </li>
+          <li class="nav-item">
+            <a href="<?php echo base_url() ?>dashboard/task_type" class="nav-link">
+              <i class="nav-icon fa fa-users"></i>
+              <p>Tipe Pekerjaan</p>
+            </a>
+          </li>
           <?php endif; ?>
           <li class="nav-item">
             <a href="<?php echo base_url() ?>dashboard/tasks" class="nav-link">
