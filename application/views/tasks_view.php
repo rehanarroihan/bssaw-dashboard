@@ -267,7 +267,7 @@
               <tbody>
                 <tr v-for="(item, idx) in taskList">
                   <td>{{ item.no }}</td>
-                  <td>{{ convertTitleCase(item.type) }}</td>
+                  <td>{{ item.type }}</td>
                   <td>{{ convertDateFormat(item.start_time) }}</td>
                   <td>{{ convertDateFormat(item.end_time) }}</td>
                   <td>{{ item.note }}</td>
@@ -308,28 +308,7 @@ var app = new Vue({
     baseURL: '<?php echo base_url() ?>',
     taskList: [],
     isAddTask: false,
-    taskTypeList: [
-      {
-        id: 'MAINTENANCE',
-        name: 'Maintenance'
-      },
-      {
-        id: 'INSTALLATION',
-        name: 'Installation'
-      },
-      {
-        id: 'PREVENTIVE',
-        name: 'Preventive'
-      },
-      {
-        id: 'VISIT',
-        name: 'Visit'
-      },
-      {
-        id: 'BTS',
-        name: 'BTS'
-      }
-    ],
+    taskTypeList: [],
     newTaskData: {
       type: '',
       full_name: '<?php echo $this->session->userdata('full_name') ?>',
@@ -437,16 +416,25 @@ var app = new Vue({
       });
     },
 
-    getAttachmentLink(fileName) {
-      return this.baseURL + 'assets/upload/' + fileName;
+    getTaskTypeList() {
+      const self = this;
+      self.taskTypeList = [];
+      axios.post(self.baseURL + 'tasktype/get').then((res) => {
+        if (res.data.length === 0) { return; }
+        // converting to bettter format
+        for (let i = 0; res.data.length; i++) {
+          const number = i + 1;
+          let newFormat = {
+            id: res.data[i].id_task_type,
+            name: res.data[i].job_type,
+          };
+          self.taskTypeList.push(newFormat);
+        }
+      });
     },
 
-    convertTitleCase(string) {
-      str = string.toLowerCase().split(' ');
-      for (var i = 0; i < str.length; i++) {
-        str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1); 
-      }
-      return str.join(' ');
+    getAttachmentLink(fileName) {
+      return this.baseURL + 'assets/upload/' + fileName;
     },
 
     convertDateFormat(oldFormat) {
@@ -567,6 +555,7 @@ var app = new Vue({
     }
   },
 	mounted() {
+    this.getTaskTypeList();
     this.getMyTaskList();
 	}
 });

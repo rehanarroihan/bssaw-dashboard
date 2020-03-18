@@ -5,7 +5,7 @@ class Tasks_model extends CI_Model {
 
     public function insert($type, $start_time, $end_time, $note, $attachment, $id_user){
 		$data = array(
-			'type' => $type,
+			'id_job_type' => $type,
 			'start_time'  => $start_time,
             'end_time'  => $end_time,
             'note'  => $note,
@@ -23,15 +23,19 @@ class Tasks_model extends CI_Model {
     
     public function get($id_user){
         if ($id_user != "xx") {
+            // INFO : non admin call
             $query = $this->db
-                    ->select('id, type, start_time, end_time, note, attachment')
+                    ->select('tasks.id, start_time, end_time, note, attachment, job_type.job_type as type')
                     ->where('id_user', $id_user)
+                    ->join('job_type', 'job_type.id = tasks.id_job_type')
                     ->get('tasks')
                     ->result();
         } else {
+            // INFO : if called from admin task view, will bring "xx" param
             $query = $this->db
-                ->select('tasks.id AS id, type, start_time, end_time, users.id AS id_user, users.full_name AS employee, tasks.attachment, tasks.note')
+                ->select('tasks.id AS id, start_time, end_time, users.id AS id_user, users.full_name AS employee, tasks.attachment, tasks.note, job_type.job_type AS type')
                 ->join('users', 'users.id = tasks.id_user')
+                ->join('job_type', 'job_type.id = tasks.id_job_type')
                 ->order_by('start_time', 'desc')
                 ->get('tasks')->result();
         }
