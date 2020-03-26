@@ -34,7 +34,9 @@ class Dashboard extends CI_Controller {
 	public function getReport() {
 		$json = file_get_contents('php://input');
 		$data = json_decode($json);
-		echo json_encode($this->Dashboard_model->getReport($data->timeStart, $data->timeEnd));
+		echo json_encode(
+			$this->Dashboard_model->getReport($data->timeStart, $data->timeEnd, $data->taskType)
+		);
 	}
 
 	public function date() {

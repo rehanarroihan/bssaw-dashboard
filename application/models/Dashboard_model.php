@@ -3,39 +3,51 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Dashboard_model extends CI_Model {
 
-	public function getReport($timeStart, $timeEnd) {
-		$taskListQuery = $this->db
-							->select('tasks.id AS id_task, type, start_time, end_time, users.id AS id_user, users.full_name')
+	public function getReport($timeStart, $timeEnd, $taskType = "") {
+		$reportQuery = $this->db
+							->select('tasks.id AS id_task, start_time, end_time, users.id AS id_user, users.full_name, job_type.job_type AS type')
 							->where("start_time >=", $timeStart)
 							->where("end_time <=", $timeEnd)
 							->join('users', 'users.id = tasks.id_user')
+							->join('job_type', 'job_type.id = tasks.id_job_type')
 							->order_by('start_time', 'desc')
-							->get('tasks')->result();
+							->get('tasks');
+		if ($taskType != "") {
+			$reportQuery = $this->db
+							->select('tasks.id AS id_task, start_time, end_time, users.id AS id_user, users.full_name, job_type.job_type AS type')
+							->where("start_time >=", $timeStart)
+							->where("end_time <=", $timeEnd)
+							->where("id_job_type", $taskType)
+							->join('users', 'users.id = tasks.id_user')
+							->join('job_type', 'job_type.id = tasks.id_job_type')
+							->order_by('start_time', 'desc')
+							->get('tasks');
+		}
 		$result = [
 			"timeStart" => $timeStart,
 			"timeEnd" => $timeEnd,
 			"summary" => $this->getSummary($timeStart, $timeEnd),
-			"data" => $taskListQuery
+			"data" => $reportQuery->result()
 		];
 		return $result;
 	}
     
     private function getSummary($timeStart, $timeEnd){
-		$result = [
-			"maintenance" => $this->taskTypeCount('MAINTENANCE', $timeStart, $timeEnd),
-			"installation" => $this->taskTypeCount('INSTALLATION', $timeStart, $timeEnd),
-			"preventive" => $this->taskTypeCount('PREVENTIVE', $timeStart, $timeEnd),
-			"visit" => $this->taskTypeCount('VISIT', $timeStart, $timeEnd),
-			"bts" => $this->taskTypeCount('BTS', $timeStart, $timeEnd),
-		];
-        return $result;
-	}
-	
-	private function taskTypeCount($type, $timeStart, $timeEnd) {
-		return $this->db->where('type', $type)
-						->where("start_time >=", $timeStart)
-						->where("end_time <=", $timeEnd)
-						->get('tasks')->num_rows();
+		$result = [];
+		$taskList = $this->db->get('job_type')->result();
+		for ($i=0; $i < count($taskList); $i++) {
+			$countQuery = $this->db->select('COUNT(*) as count')
+									->where('id_job_type', $taskList[$i]->id)
+									->where("start_time >=", $timeStart)
+									->where("end_time <=", $timeEnd)
+									->get('tasks')
+									->result();
+			array_push($result, array(
+				"name" => $taskList[$i]->job_type,
+				"count" => $countQuery[0]->count
+			));
+		}
+		return $result;
 	}
 
 	public function getDashboardData() {

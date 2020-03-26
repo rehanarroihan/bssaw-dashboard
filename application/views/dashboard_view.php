@@ -74,89 +74,50 @@
         <h3 class="card-title">Report Pekerjaan Petugas</h3>
       </div>
       <div class="card-body">
+        <!-- Black transparent overlay for loading -->
         <div class="loading" v-if="reportSearchLoading" style="height: 100%; width: 100%; z-index: 999; background-color: #73737373; position: absolute; top: 0; left: 0"></div>
-        <div class="form-group">
-          <label>Filter Range Waktu</label>
-          <div class="input-group">
-            <div class="input-group-prepend">
-              <span class="input-group-text"><i class="far fa-clock"></i></span>
+        <div class="form-row">
+          <div class="col">
+            <label>Filter Range Waktu</label>
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><i class="far fa-clock"></i></span>
+              </div>
+              <input type="text" v-model="hwow" class="form-control float-right" id="report-range">
             </div>
-            <input type="text" v-model="hwow" class="form-control float-right" id="report-range">
-            <button type="button" @click="getReportData" class="btn btn-primary ml-2">
-              <i class="fa fa-search"></i>
-              &nbsp;Cari
-            </button>
           </div>
+          <div class="col">
+            <label>Filter Jenis Pekerjaan</label>
+            <select class="form-control" @change="onJenisFilterChange">
+              <option value="">-- Pilih Jenis Pekerjaan --</option>
+              <option
+                v-for="(item, index) in taskTypeList"
+                :key="item.id"
+                :value="item.id"
+              >
+                {{ item.name }}
+              </option>
+            </select>
+          </div>
+          <button type="button" @click="getReportData" class="btn btn-primary ml-2 mt-4">
+            <i class="fa fa-search"></i>
+            &nbsp;Cari
+          </button>
         </div>
-        <!-- result info -->
-        <h6 class="mb-2"><b>Summary</b>
+        <h6 class="mt-2 mb-2"><b>Summary</b>
           ({{ convertDateFormat(reportData.timeStart) }} s/d {{  convertDateFormat(reportData.timeEnd) }})
         </h6>
+        <!-- Show total job by type -->
         <div class="row">
-          <div class="col-md-3 col-sm-6 col-12">
+          <div v-for="(item, index) in reportData.summary" :key="index" class="col-md-3 col-sm-6 col-12">
             <div class="info-box">
               <span class="info-box-icon bg-info"><i class="fa fa-tools"></i></span>
-
               <div class="info-box-content">
-                <span class="info-box-text">Maintenance</span>
-                <span class="info-box-number">{{ reportData.summary.maintenance }}</span>
+                <span class="info-box-text">{{ item.name }}</span>
+                <span class="info-box-number">{{ item.count }}</span>
               </div>
-              <!-- /.info-box-content -->
             </div>
-            <!-- /.info-box -->
           </div>
-          <!-- /.col -->
-          <div class="col-md-3 col-sm-6 col-12">
-            <div class="info-box">
-              <span class="info-box-icon bg-success"><i class="fa fa-tv"></i></span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Installation</span>
-                <span class="info-box-number">{{ reportData.summary.installation }}</span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-          <div class="col-md-3 col-sm-6 col-12">
-            <div class="info-box">
-              <span class="info-box-icon bg-warning"><i class="fas fa-hand-paper"></i></span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Preventive</span>
-                <span class="info-box-number">{{ reportData.summary.preventive }}</span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
-          <div class="col-md-3 col-sm-6 col-12">
-            <div class="info-box">
-              <span class="info-box-icon bg-danger"><i class="fa fa-walking"></i></span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">Visit</span>
-                <span class="info-box-number">{{ reportData.summary.visit }}</span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <div class="col-md-3 col-sm-6 col-12">
-            <div class="info-box">
-              <span class="info-box-icon bg-warning"><i class="fa fa-broadcast-tower"></i></span>
-
-              <div class="info-box-content">
-                <span class="info-box-text">BTS</span>
-                <span class="info-box-number">{{ reportData.summary.bts }}</span>
-              </div>
-              <!-- /.info-box-content -->
-            </div>
-            <!-- /.info-box -->
-          </div>
-          <!-- /.col -->
         </div>
 
         <table id="reportTable" class="table table-bordered table-striped">
@@ -173,7 +134,7 @@
             <tr v-for="(item, index) in reportData.data" :key="index">
               <td>{{ item.no }}</td>
               <td>{{ item.full_name }}</td>
-              <td>{{ convertTitleCase(item.type) }}</td>
+              <td>{{ item.type }}</td>
               <td>{{ convertDateFormat(item.start_time) }}</td>
               <td>{{ convertDateFormat(item.end_time) }}</td>
             </tr>
@@ -209,10 +170,12 @@ var app = new Vue({
     baseURL: '<?php echo base_url() ?>',
     reportSearchLoading: false,
     hwow: '',
+    taskTypeList: [],
     reportData: {
       summary: {},
       data: []
     },
+    selectedTaskTypeFilter: '',
 	},
 	methods: {
     getReportData() {
@@ -224,7 +187,9 @@ var app = new Vue({
       const self = this;
       self.employeeList = [];
       axios.post(self.baseURL + 'dashboard/getReport', {
-        timeStart: startTimeRange, timeEnd: endTimeRange
+        timeStart: startTimeRange,
+        timeEnd: endTimeRange,
+        taskType: this.selectedTaskTypeFilter
       }).then((res) => {
         self.reportSearchLoading = false;
         self.reportData.summary = res.data.summary;
@@ -252,15 +217,29 @@ var app = new Vue({
       return moment(oldFormat).lang('id').format('dddd, DD MMMM YYYY - HH:mm');
     },
 
-    convertTitleCase(string) {
-      str = string.toLowerCase().split(' ');
-      for (var i = 0; i < str.length; i++) {
-        str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1); 
-      }
-      return str.join(' ');
+    getTaskTypeList() {
+      const self = this;
+      self.taskTypeList = [];
+      axios.post(self.baseURL + 'tasktype/get').then((res) => {
+        if (res.data.length === 0) { return; }
+        // converting to bettter format
+        for (let i = 0; res.data.length; i++) {
+          const number = i + 1;
+          let newFormat = {
+            id: res.data[i].id_task_type,
+            name: res.data[i].job_type,
+          };
+          self.taskTypeList.push(newFormat);
+        }
+      });
+    },
+
+    onJenisFilterChange(event) {
+      this.selectedTaskTypeFilter = event.target.value;
     },
   },
 	mounted() {
+    this.getTaskTypeList();
     this.getReportData();
 	}
 });
