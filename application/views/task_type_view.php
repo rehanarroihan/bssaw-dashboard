@@ -175,7 +175,7 @@ var app = new Vue({
     getTaskTypeList() {
       const self = this;
       self.taskTypeList = [];
-      axios.post(self.baseURL + 'tasktype/get').then((res) => {
+      axios.post(self.baseURL + 'TaskType/get').then((res) => {
         if (res.data.length === 0) { return; }
         // converting to bettter format
         for (let i = 0; res.data.length; i++) {
@@ -204,7 +204,7 @@ var app = new Vue({
       if (this.$v.newTaskTypeData.$invalid) { return; }
       this.isAddTaskTypeLoading = true;
       const self = this;
-      axios.post(self.baseURL + 'tasktype/insert',
+      axios.post(self.baseURL + 'TaskType/insert',
         self.newTaskTypeData).then(() => {
         self.isAddTaskTypeLoading = false;
         self.newTaskTypeData = {
@@ -224,7 +224,7 @@ var app = new Vue({
       if (this.$v.editTaskTypeData.$invalid) { return; }
       this.isEditTaskTypeLoading = true;
       const self = this;
-      axios.post(self.baseURL + 'tasktype/update',
+      axios.post(self.baseURL + 'TaskType/update',
         self.editTaskTypeData).then(() => {
         self.isEditTaskTypeLoading = false;
         self.getTaskTypeList();
@@ -235,7 +235,7 @@ var app = new Vue({
       const self = this;
       let r = confirm('Menghapus data karyawan akan menghapus data pekerjaan mereka juga dan mengakibatkan karyawan ini tidak bisa login, lanjutkan ?');
       if (r == true) {
-        axios.post(self.baseURL + 'tasktype/delete', { id }).then((res) => {
+        axios.post(self.baseURL + 'TaskType/delete', { id }).then((res) => {
           self.getTaskTypeList();
         });
       }

@@ -409,7 +409,7 @@ var app = new Vue({
     getTaskTypeList() {
       const self = this;
       self.taskTypeList = [];
-      axios.post(self.baseURL + 'tasktype/get').then((res) => {
+      axios.post(self.baseURL + 'TaskType/get').then((res) => {
         if (res.data.length === 0) { return; }
         // converting to bettter format
         for (let i = 0; res.data.length; i++) {
